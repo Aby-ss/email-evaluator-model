@@ -1,0 +1,22 @@
+Saw you have got a team of machine learning programmers and model developers.
+
+They are probably working on many different modules with training data and code that is unique in it’s own way.
+
+Problem is, they run on low productivity or efficiency, caused by :
+
+- Manual Data labelling
+- Poor Data collection and selection
+- Lack of Data variety
+- Long development time and training (*frustrating*!)
+
+We at Labelly do all the repetitive work for you which means your team works at the maximum efficiency rate while we take care of your data.
+
+**Seeing any of these issues at [recipient’s company] ?**
+
+ 
+
+Would you be open to a discuss how Labelly can not take away the stress of your developers but also help your models reach the market faster than ever before ?
+
+Best regards,
+
+Rao
