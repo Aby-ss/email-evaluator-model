@@ -2,21 +2,18 @@ import os
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 
+from rich import print
+from rich import box
+from rich import text
+from rich.panel import Panel
+
 from rich.traceback import install
 install(show_locals=True)
 
 # Make sure to download the required NLTK resources
 import nltk
-import ssl
 
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    pass
-else:
-    ssl._create_default_https_context = _create_unverified_https_context
-
-nltk.download('all')
+# nltk.download('all')
 
 def read_email(file_path):
     """
@@ -56,9 +53,11 @@ file_path = '/Users/raoabdul/Documents/GitHub/email-evaluator-model/data/raw/ema
 
 # Read the email
 email_content = read_email(file_path)
-print("Original Email Content:\n", email_content)
+print(Panel("Original Email Content:", border_style="bold", box=box.SQUARE))
+print(email_content)
+
 
 # Preprocess the email
 preprocessed_tokens = preprocess_email(email_content)
-print("\nPreprocessed Email Tokens:\n", preprocessed_tokens)
-
+print(Panel("Preprocessed Email Tokens:", border_style="bold", box=box.SQUARE))
+print(preprocessed_tokens)
