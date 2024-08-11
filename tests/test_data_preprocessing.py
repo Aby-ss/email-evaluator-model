@@ -7,8 +7,16 @@ install(show_locals=True)
 
 # Make sure to download the required NLTK resources
 import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
+import ssl
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
+
+nltk.download('all')
 
 def read_email(file_path):
     """
