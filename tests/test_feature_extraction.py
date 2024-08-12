@@ -3,6 +3,12 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import nltk
 
+from rich import box
+from rich import text
+from rich import print
+
+from rich.panel import Panel
+
 from rich.traceback import install
 install(show_locals=True)
 
@@ -86,13 +92,15 @@ def main(file_path):
     """
     # Read the email
     email_content = read_email(file_path)
-    print("Original Email Content:\n", email_content)
-    
+    print(Panel("Original Email Content:", border_style="bold", box=box.SQUARE))
+    print(email_content)
+
     # Extract features
     features = extract_features(email_content)
     
     # Display extracted features
-    print("\nExtracted Features:\n", features)
+    print(Panel.fit("Extracted Features:", border_style="bold green", box=box.SQUARE))
+    print(features)
 
 if __name__ == '__main__':
     # Define the file path
