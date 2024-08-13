@@ -1,6 +1,7 @@
 import os
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
+from nltk.sentiment import SentimentIntensityAnalyzer
 import nltk
 
 from rich import box
@@ -8,13 +9,13 @@ from rich import text
 from rich import print
 
 from rich.panel import Panel
-
 from rich.traceback import install
 install(show_locals=True)
 
 # Ensure NLTK resources are downloaded
 # nltk.download('punkt')
 # nltk.download('stopwords')
+# nltk.download('vader_lexicon')
 
 def read_email(file_path):
     """
@@ -49,6 +50,45 @@ def preprocess_email(email_content):
     
     return tokens
 
+def cta_analysis(email_content):
+    """
+    Analyzes the presence and sentiment of CTAs in the email content.
+    
+    Args:
+    - email_content (str): The content of the email as a string.
+    
+    Returns:
+    - dict: A dictionary containing CTA presence and sentiment score.
+    """
+    # Expanded CTA keywords list
+    cta_keywords = [
+        'call to action', 'contact us', 'buy now', 'subscribe', 'learn more', 'get started',
+        'sign up', 'register', 'download', 'join', 'click here', 'request a demo', 'schedule a call',
+        'get your free', 'take advantage', 'order now', 'reserve your spot', 'get it now', 'limited time offer'
+    ]
+    
+    # Check if any CTA keywords are present
+    cta_present = any(keyword in email_content.lower() for keyword in cta_keywords)
+    
+    # Use NLTK's SentimentIntensityAnalyzer to assess the sentiment of the CTA sentences
+    sia = SentimentIntensityAnalyzer()
+    sentences = sent_tokenize(email_content.lower())
+    
+    # Filter sentences containing CTA keywords
+    cta_sentences = [sent for sent in sentences if any(keyword in sent for keyword in cta_keywords)]
+    
+    # Calculate average sentiment score for CTA sentences
+    if cta_sentences:
+        sentiment_scores = [sia.polarity_scores(sent)['compound'] for sent in cta_sentences]
+        avg_sentiment_score = sum(sentiment_scores) / len(sentiment_scores)
+    else:
+        avg_sentiment_score = 0
+    
+    return {
+        'cta_present': cta_present,
+        'cta_sentiment_score': avg_sentiment_score
+    }
+
 def extract_features(email_content):
     """
     Extracts features from the email content.
@@ -67,45 +107,47 @@ def extract_features(email_content):
     tokens = preprocess_email(email_content)
     num_non_stopwords = len(tokens)
     num_words = len(word_tokenize(email_content))
-    conciseness = num_non_stopwords / num_words if num_words > 0 else 0
+    conciseness = (num_non_stopwords / num_words * 100) if num_words > 0 else 0
     
-    # Clear CTA (simple keyword-based approach)
-    cta_keywords = ['call to action', 'contact us', 'buy now', 'subscribe', 'learn more', 'get started', 'call', 'discuss']
-    cta_present = any(keyword in email_content.lower() for keyword in cta_keywords)
-    cta_score = 1 if cta_present else 0
+    # Analyze CTA presence and sentiment
+    cta_info = cta_analysis(email_content)
+    
+    # Assign a CTA score based on presence and sentiment
+    cta_score = (1 if cta_info['cta_present'] else 0) + cta_info['cta_sentiment_score']
     
     features = {
         'length_characters': length_characters,
         'length_words': length_words,
-        'conciseness': conciseness,
+        'conciseness_percentage': conciseness,
         'cta_score': cta_score
     }
     
     return features
 
-def main(file_path):
+def process_directory(directory_path):
     """
-    Main function to read email, preprocess, and extract features.
+    Processes all text files in the specified directory and extracts features for each one.
     
     Args:
-    - file_path (str): Path to the text file.
+    - directory_path (str): Path to the directory containing text files.
     """
-    # Read the email
-    email_content = read_email(file_path)
-    print(Panel("Original Email Content:", border_style="bold", box=box.SQUARE))
-    print(email_content)
-
-    # Extract features
-    features = extract_features(email_content)
-    
-    # Display extracted features
-    print(Panel.fit("Extracted Features:", border_style="bold green", box=box.SQUARE))
-    print(features)
+    for filename in os.listdir(directory_path):
+        if filename.endswith('.txt'):
+            file_path = os.path.join(directory_path, filename)
+            print(Panel(f"Processing file: {filename}", border_style="bold", box=box.SQUARE))
+            
+            # Read the email content
+            email_content = read_email(file_path)
+            
+            # Extract features
+            features = extract_features(email_content)
+            
+            # Display extracted features
+            print(Panel(f"Extracted Features:\n{features}", border_style="bold green", box=box.SQUARE))
 
 if __name__ == '__main__':
-    # Define the file path
-    file_path = '/Users/raoabdul/Documents/GitHub/email-evaluator-model/data/raw/email1.txt'  # Update this path as needed
+    # Define the directory path
+    directory_path = '/Users/raoabdul/Documents/GitHub/email-evaluator-model/data/raw/'  # Update this path as needed
     
-    # Run the main function
-    main(file_path)
-
+    # Process all files in the directory
+    process_directory(directory_path)
