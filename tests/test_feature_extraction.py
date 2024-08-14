@@ -143,7 +143,7 @@ def process_directory(directory_path):
             features = extract_features(email_content)
             
             # Display extracted features
-            print(Panel(f"Extracted Features:\n{features}", border_style="bold green", box=box.SQUARE))
+            print(Panel(f"Extracted Features:\n{features}", border_style="bold yellow", box=box.SQUARE))
 
 if __name__ == '__main__':
     # Define the directory path
@@ -151,3 +151,4 @@ if __name__ == '__main__':
     
     # Process all files in the directory
     process_directory(directory_path)
+
